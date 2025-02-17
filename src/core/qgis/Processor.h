@@ -18,6 +18,17 @@
 #include <QCoreApplication>
 #include <QTimer>
 #include <qgsabstractgeometry.h>
+#include <QOffscreenSurface>
+#include <QOpenGLContext>
+#include <qgs3d.h>
+#include <qgs3dmapcanvas.h>
+#include <qgs3d.h>
+#include <qgs3dmapcanvas.h>
+#include <qgswkbtypes.h>
+#include <qgslayoutmanager.h>
+#include <qgsmapviewsmanager.h>
+#include <qgsoffscreen3dengine.h>
+#include <qgs3dutils.h>
 
 #include "core/error/exceptions.h"
 #include "core/enums/PaperSpecification.h"

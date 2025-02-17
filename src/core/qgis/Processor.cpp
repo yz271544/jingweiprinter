@@ -340,6 +340,32 @@ Processor::processByPlottingWeb(const oatpp::String &token, const DTOWRAPPERNS::
                             auto upperPaperSpec = Formula::toUpperCase(paperSpec);
                             PaperSpecification availablePaper3D(QString::fromStdString(upperPaperSpec));
                             auto canvas2d = m_app->getCanvas();
+
+                            // 设置 OpenGL 表面格式
+                            QSurfaceFormat format;
+                            format.setVersion(4, 1);  // 设置 OpenGL 版本
+                            format.setProfile(QSurfaceFormat::CoreProfile);
+                            QSurfaceFormat::setDefaultFormat(format);
+
+                            // 创建离屏表面
+                            QOffscreenSurface surface;
+                            surface.setFormat(format);
+                            surface.create();
+
+                            // 创建 OpenGL 上下文
+                            QOpenGLContext context;
+                            context.setFormat(format);
+                            if (!context.create()) {
+                                qWarning() << "Failed to create OpenGL context";
+                                return -1;
+                            }
+
+                            // 使上下文成为当前上下文
+                            if (!context.makeCurrent(&surface)) {
+                                qWarning() << "Failed to make OpenGL context current";
+                                return -1;
+                            }
+
                             auto jwLayout3d = add_3d_layout(canvas2d, layoutType, plottingWeb, image_spec, availablePaper3D,
                                                             false,
                                                             removeLayerNames3D, removeLayerPrefixes3D);
@@ -349,6 +375,9 @@ Processor::processByPlottingWeb(const oatpp::String &token, const DTOWRAPPERNS::
                             QString d3_scene_png = QString().append(project_dir).append("/").append("d3_scene.png");
                             spdlog::info("d3 scene png: {}", d3_scene_png.toStdString());
                             jwLayout3d->exportLayoutToImage(layoutType, d3_scene_png);
+
+                            // 释放OpenGL上下文
+                            context.doneCurrent();
                         } else {
                             responseDto->error = "enable_3d in config.yaml is false";
                         }
@@ -413,6 +442,7 @@ Processor::processByPlottingWeb(const oatpp::String &token, const DTOWRAPPERNS::
                 responseDto->error = e.what();
                 eventLoop.quit(); // 退出事件循环
             }
+            return 0;
         }, Qt::QueuedConnection);
         // 启动事件循环，直到 lambda 执行完成
         eventLoop.exec();

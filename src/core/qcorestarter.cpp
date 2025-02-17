@@ -12,24 +12,19 @@
 QCoreStarter::QCoreStarter() {}
 
 QCoreStarter::~QCoreStarter() {
-    if (mQSurfaceFormat) {
-//        spdlog::info("reset the mQSurfaceFormat");
+    /*if (mQSurfaceFormat) {
         mQSurfaceFormat.reset();
     }
     if (mQOffscreenSurface) {
-//        spdlog::info("reset the mQOffscreenSurface");
         mQOffscreenSurface.reset();
     }
     if (mOpenGLContext) {
-//        spdlog::info("reset the mOpenGLContext");
         mOpenGLContext.reset();
-    }
+    }*/
     if (mQgsApp) {
-//        spdlog::info("reset the mQgsApp");
         mQgsApp.reset();
     }
     if (mApp) {
-//        spdlog::info("reset the mApp");
         mApp.reset();
     }
 }
@@ -88,41 +83,30 @@ void QCoreStarter::Init(StarterContext& context) {
     } catch (const std::exception& e) {
         spdlog::error("init qgis error: {}", e.what());
     }
-//    spdlog::info("inited the qgs app");
-
-    // 设置OpenGL环境
-//    spdlog::info("设置OpenGL环境");
-    //auto qSurfaceFormat = QSurfaceFormat::defaultFormat();
-    //mQSurfaceFormat.reset(&qSurfaceFormat);
-    mQSurfaceFormat = std::make_unique<QSurfaceFormat>();
-    //mQSurfaceFormat->setRenderableType(QSurfaceFormat::OpenGL);
+    /*mQSurfaceFormat = std::make_unique<QSurfaceFormat>();
     *mQSurfaceFormat = QSurfaceFormat::defaultFormat();
     mQSurfaceFormat->setVersion(4, 1);
     mQSurfaceFormat->setProfile(QSurfaceFormat::CoreProfile);
-    QSurfaceFormat::setDefaultFormat(*mQSurfaceFormat);
+    QSurfaceFormat::setDefaultFormat(*mQSurfaceFormat);*/
 
     // 创建离屏渲染环境
-//    spdlog::info("创建离屏渲染环境");
-    mQOffscreenSurface = std::make_unique<QOffscreenSurface>();
+    /*mQOffscreenSurface = std::make_unique<QOffscreenSurface>();
     mQOffscreenSurface->setFormat(*mQSurfaceFormat);
-//    spdlog::info("create offscreen surface");
-    mQOffscreenSurface->create();
+    mQOffscreenSurface->create();*/
 
     // 创建OpenGL上下文
-//    spdlog::info("创建OpenGL上下文");
-    mOpenGLContext = std::make_unique<QOpenGLContext>();
+    /*mOpenGLContext = std::make_unique<QOpenGLContext>();
     mOpenGLContext->setFormat(*mQSurfaceFormat);
     if (!mOpenGLContext->create()) {
         spdlog::error("Failed to create OpenGL context");
         exit(-1);
-    }
+    }*/
 
     // 设置当前上下文
-//    spdlog::info("设置当前上下文");
-    if (!mOpenGLContext->makeCurrent(mQOffscreenSurface.get())) {
+    /*if (!mOpenGLContext->makeCurrent(mQOffscreenSurface.get())) {
         spdlog::error("Failed to make OpenGL context current");
         exit(-1);
-    }
+    }*/
 
 //    spdlog::info("QCoreStarter Init end");
 }
@@ -153,10 +137,8 @@ void QCoreStarter::Stop(StarterContext& context) {
         spdlog::info("QCoreStarter already stopped, skipping...");
         return;
     }
-//    spdlog::info("QCoreStarter Stop start");
     // 停止事件循环
     if (!mStopped) {
-//        spdlog::info("QCoreStarter Stop start");
         mStopped = true;
         if (QgsApplication::instance()) {
             QgsApplication::exitQgis();
@@ -167,29 +149,19 @@ void QCoreStarter::Stop(StarterContext& context) {
 
 
     // 释放 OpenGL 上下文
-    if (mOpenGLContext) {
-//        spdlog::info("Destroy OpenGL context");
+    /*if (mOpenGLContext) {
         if (mOpenGLContext->makeCurrent(mQOffscreenSurface.get())) {
-//            spdlog::info("OpenGL context current during cleanup");
             mOpenGLContext->doneCurrent();
-        } else {
-//            spdlog::error("Failed to make OpenGL context current during cleanup");
         }
-//        spdlog::info("destroy OpenGL context");
-        //mOpenGLContext->destroyed();
-        //mOpenGLContext.reset();
         mOpenGLContext->deleteLater();
-//        spdlog::info("reset OpenGL context");
         mOpenGLContext.reset();
-    }
+    }*/
 
     // 释放离屏表面
-    if (mQOffscreenSurface) {
-//        spdlog::info("Destroy offscreen surface");
+    /*if (mQOffscreenSurface) {
         mQOffscreenSurface->destroy();
-//        spdlog::info("reset offscreen surface");
         mQOffscreenSurface.reset();
-    }
+    }*/
 
 //    spdlog::info("QCoreStarter Stop end");
 }
