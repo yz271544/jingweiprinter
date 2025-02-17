@@ -24,6 +24,8 @@ void LoggerStarter::Init(StarterContext &context) {
             qtLogEnable = (*config)["logging"]["qt_log_enable"].as<bool>();
             if (qtLogEnable) {
                 setQLoggerLevel(loggerLevel);
+                // 安装自定义消息处理程序
+                qInstallMessageHandler(customMessageHandler);
             }
         } catch (const std::exception &e) {
             spdlog::warn("get logging.level error: {}", e.what());
@@ -164,4 +166,47 @@ static void disableAllQtLogs() {
                                   "*.fatal=false\n");
     // 设置日志过滤规则
     QLoggingCategory::setFilterRules(qLoggerRule);
+}
+
+// 自定义消息处理函数
+void LoggerStarter::customMessageHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg)
+{
+    QString txt;
+    // 根据日志级别添加相应的标识
+    switch (type) {
+        case QtDebugMsg:
+            txt = QString("Debug: ");
+            break;
+        case QtInfoMsg:
+            txt = QString("Info: ");
+            break;
+        case QtWarningMsg:
+            txt = QString("Warning: ");
+            break;
+        case QtCriticalMsg:
+            txt = QString("Critical: ");
+            break;
+        case QtFatalMsg:
+            txt = QString("Fatal: ");
+            abort();
+    }
+
+    // 添加时间戳
+    txt += QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss ");
+
+    // 添加线程ID
+    txt += QString("Thread %1: ").arg((quintptr)QThread::currentThreadId());
+
+    // 添加源文件和行号信息
+    if (context.file != nullptr) {
+        txt += QString("%1:%2 - ").arg(context.file).arg(context.line);
+    }
+
+    // 添加实际的日志消息
+    txt += msg;
+
+    // 输出日志到标准输出
+    QByteArray localMsg = txt.toLocal8Bit();
+    fprintf(stderr, "%s\n", localMsg.constData());
+    fflush(stderr);
 }

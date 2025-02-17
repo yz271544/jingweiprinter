@@ -10,6 +10,8 @@
 #include "yaml-cpp/yaml.h"
 #include <QDebug>
 #include <QLoggingCategory>
+#include <QDateTime>
+#include <QThread>
 
 class LoggerStarter : public BaseStarter {
 private:
@@ -52,6 +54,8 @@ public:
 
     // 获取启动器的名称，方便在日志、调试或者管理启动器列表等场景使用
     std::string GetName();
+
+    static void customMessageHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg);
 private:
     bool mStopped = false;
 
