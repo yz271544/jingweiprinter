@@ -1,4 +1,4 @@
-### POST plotting
+### POST plotting3d
 POST http://{{host}}:{{port}}/api/qgz
 Content-Type: application/json
 Authorization: Bearer {{token}}
