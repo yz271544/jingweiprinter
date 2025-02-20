@@ -127,6 +127,10 @@ inline float FRAME_OFFSET_COEFFICIENT = getEnvFloat("FRAME_OFFSET_COEFFICIENT", 
 
 inline float PIXEL_MM_COEFFICIENT = getEnvFloat("PIXEL_MM_COEFFICIENT", 2.8);
 
+inline float BASE_TILE_LAYER_MAX_LEVEL = getEnvInt32("BASE_TILE_LAYER_MAX_LEVEL", 17);
+
+inline float BASE_TILE_LAYER_MIN_LEVEL = getEnvInt32("BASE_TILE_LAYER_MIN_LEVEL", 0);
+
 #ifdef OATPP_VERSION_LESS_1_4_0
 #define DTOWRAPPERNS oatpp::data::mapping::type
 #define OBJECTMAPPERNS oatpp::parser::json::mapping
