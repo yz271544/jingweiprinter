@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="dtoQJson.test1" type="CMakeGoogleTestRunConfigurationType" factoryName="Google Test" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="jingweiprinter" TARGET_NAME="jingweiprinter_tst" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="jingweiprinter" RUN_TARGET_NAME="jingweiprinter_tst" TEST_CLASS="dtoQJson" TEST_METHOD="test1" TEST_MODE="SUITE_TEST">
+  <configuration default="false" name="dtoQJson.test1" type="CMakeGoogleTestRunConfigurationType" factoryName="Google Test" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Project" TARGET_NAME="jingweiprinter_tst" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="Project" RUN_TARGET_NAME="jingweiprinter_tst" TEST_CLASS="dtoQJson" TEST_METHOD="test1" TEST_MODE="SUITE_TEST">
     <envs>
       <env name="LD_LIBRARY_PATH" value="$PROJECT_DIR$/../QGIS/output/lib:$PROJECT_DIR$/../QGIS/output/lib/qgis/plugins:$PROJECT_DIR$/../OSGeo4W/apps/qgis/bin:${LD_LIBRARY_PATH}" />
     </envs>

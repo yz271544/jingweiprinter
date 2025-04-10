@@ -3,3 +3,5 @@ cmake-build-release/
 .vscode/
 .idea/
 src/config.h
+out/
+.vs/

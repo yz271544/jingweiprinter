@@ -79,3 +79,16 @@ cmake options
 
 ```
 
+vcpkg install depends
+```
+vcpkg install curl:64-windows oatpp:x64-windows oatpp-curl:x64-windows oatpp-zlib:x64-windows
+```
+
+
+
+make symboliclink
+
+```
+New-Item -ItemType symboliclink -Path "D:\iProject\cpath\vcpkg\packages\curl_x64-windows\include\oatpp-1.3.0" -Target "D:\iProject\cpath\vcpkg\packages\oatpp-curl_x64-windows\include\oatpp-1.3.0"
+New-Item -ItemType symboliclink -Path "D:\iProject\cpath\vcpkg\packages\curl_x64-windows\lib\oatpp-1.3.0" -Target "D:\iProject\cpath\vcpkg\packages\oatpp-curl_x64-windows\lib\oatpp-1.3.0"
+```

@@ -24,10 +24,28 @@ if (MSVC)
     set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} /ignore:4099")
     add_definitions(-D_SILENCE_STDEXT_ARR_ITERS_DEPRECATION_WARNING)
     add_compile_options(/wd4267)
-    set(CMAKE_PREFIX_PATH D:/iProject/cpath/vcpkg/packages/oatpp_x64-windows 
-    D:/iProject/cpath/vcpkg/packages/oatpp-curl_x64-windows
-    D:/iProject/cpath/vcpkg/packages/curl_x64-windows
-    D:/iProject/cpath/vcpkg/packages/zlib_x64-windows)
+    set(VCPKG_ROOT "D:/iProject/cpath/vcpkg")
+    file(TO_CMAKE_PATH "$ENV{VCPKG_ROOT}" "${VCPKG_ROOT}")  # 转换路径格式
+    message("env VCPKG_ROOT: $ENV{VCPKG_ROOT}")
+    set(CMAKE_PREFIX_PATH "${VCPKG_ROOT}/packages" CACHE STRING "VCPKG package path")
+    message("VCPKG_ROOT: ${VCPKG_ROOT}")
+    set(VCPKG_PACKAGES_DIR "${VCPKG_ROOT}/packages")
+    # 获取所有 *_x64-windows 子目录
+    file(GLOB VCPKG_PACKAGE_DIRS "${VCPKG_PACKAGES_DIR}/*_x64-windows")
+    # 遍历每个目录，添加到 CMAKE_PREFIX_PATH
+    foreach(PACKAGE_DIR ${VCPKG_PACKAGE_DIRS})
+        # 检查是否存在 CMake 模块文件（可选）
+        if(EXISTS "${PACKAGE_DIR}/share" OR EXISTS "${PACKAGE_DIR}/lib/cmake")
+            list(APPEND CMAKE_PREFIX_PATH "${PACKAGE_DIR}")
+            message(STATUS "Added to CMAKE_PREFIX_PATH: ${PACKAGE_DIR}")
+        endif()
+    endforeach()
+    # 打印最终的 CMAKE_PREFIX_PATH
+    message(STATUS "CMAKE_PREFIX_PATH: ${CMAKE_PREFIX_PATH}")
+    #set(CMAKE_PREFIX_PATH D:/iProject/cpath/vcpkg/packages/oatpp_x64-windows 
+    #D:/iProject/cpath/vcpkg/packages/oatpp-curl_x64-windows
+    #D:/iProject/cpath/vcpkg/packages/curl_x64-windows
+    #D:/iProject/cpath/vcpkg/packages/zlib_x64-windows)
 endif()
 #if (MSVC)
 #    target_compile_options(${PROJECT_NAME} PRIVATE /wd4267)
@@ -57,8 +75,13 @@ else()
     find_package(yaml-cpp REQUIRED)
     find_package(spdlog REQUIRED)
 endif()
-find_package(oatpp 1.4.0 REQUIRED)
-find_package(oatpp-curl 1.4.0 REQUIRED)
+
+if (MSVC)
+find_package(CURL REQUIRED)
+endif
+
+find_package(oatpp REQUIRED)
+find_package(oatpp-curl REQUIRED)
 #find_package(gtest REQUIRED)
 
 message("oatpp_VERSION: ${oatpp_VERSION}")

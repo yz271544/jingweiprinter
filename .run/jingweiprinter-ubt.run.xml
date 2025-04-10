@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="jingweiprinter-ubt" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="jingweiprinter" TARGET_NAME="jingweiprinter" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="jingweiprinter" RUN_TARGET_NAME="jingweiprinter">
+  <configuration default="false" name="jingweiprinter-ubt" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Project" TARGET_NAME="jingweiprinter" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="Project" RUN_TARGET_NAME="jingweiprinter">
     <envs>
       <env name="ENABLE_POINT_CLUSTER" value="true" />
       <env name="ENV_PROFILE" value="test" />
