@@ -19,70 +19,63 @@ message("CMAKE_AUTORCC: ${CMAKE_AUTORCC}")
 
 
 if (MSVC)
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /ignore:4099")
-    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /ignore:4099")
-    set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} /ignore:4099")
+    #set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /ignore:4099")
+    #set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /ignore:4099")
+    #set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} /ignore:4099")
+
+    #add_compile_options(/wd4267)
+    add_compile_options(/wd4267 /ignore:4099)
     add_definitions(-D_SILENCE_STDEXT_ARR_ITERS_DEPRECATION_WARNING)
-    add_compile_options(/wd4267)
-    set(VCPKG_ROOT "D:/iProject/cpath/vcpkg")
-    file(TO_CMAKE_PATH "$ENV{VCPKG_ROOT}" "${VCPKG_ROOT}")  # 转换路径格式
-    message("env VCPKG_ROOT: $ENV{VCPKG_ROOT}")
-    set(CMAKE_PREFIX_PATH "${VCPKG_ROOT}/packages" CACHE STRING "VCPKG package path")
-    message("VCPKG_ROOT: ${VCPKG_ROOT}")
-    set(VCPKG_PACKAGES_DIR "${VCPKG_ROOT}/packages")
-    # 获取所有 *_x64-windows 子目录
-    file(GLOB VCPKG_PACKAGE_DIRS "${VCPKG_PACKAGES_DIR}/*_x64-windows")
-    # 遍历每个目录，添加到 CMAKE_PREFIX_PATH
-    foreach(PACKAGE_DIR ${VCPKG_PACKAGE_DIRS})
-        # 检查是否存在 CMake 模块文件（可选）
-        if(EXISTS "${PACKAGE_DIR}/share" OR EXISTS "${PACKAGE_DIR}/lib/cmake")
-            list(APPEND CMAKE_PREFIX_PATH "${PACKAGE_DIR}")
-            message(STATUS "Added to CMAKE_PREFIX_PATH: ${PACKAGE_DIR}")
-        endif()
-    endforeach()
-    # 打印最终的 CMAKE_PREFIX_PATH
-    message(STATUS "CMAKE_PREFIX_PATH: ${CMAKE_PREFIX_PATH}")
-    #set(CMAKE_PREFIX_PATH D:/iProject/cpath/vcpkg/packages/oatpp_x64-windows 
-    #D:/iProject/cpath/vcpkg/packages/oatpp-curl_x64-windows
-    #D:/iProject/cpath/vcpkg/packages/curl_x64-windows
-    #D:/iProject/cpath/vcpkg/packages/zlib_x64-windows)
-endif()
-#if (MSVC)
-#    target_compile_options(${PROJECT_NAME} PRIVATE /wd4267)
-#endif()
 
-# 生成 config.h 头文件
-message("CMAKE_HOME_DIRECTORY: ${CMAKE_HOME_DIRECTORY}")
-configure_file(${CMAKE_HOME_DIRECTORY}/src/config.h.in ${CMAKE_HOME_DIRECTORY}/src/config.h)
+    #set(CMAKE_TOOLCHAIN_FILE "" CACHE STRING "Clear toolchain" FORCE)
+    # 彻底禁用 vcpkg
+    set(CMAKE_TOOLCHAIN_FILE "" CACHE STRING "Clear vcpkg" FORCE)
+    unset(VCPKG_TARGET_TRIPLET CACHE)
+    unset(VCPKG_APPLOCAL_DEPS CACHE)
 
-if (NOT DEFINED $ENV{MASTER_RELEASE} AND $ENV{MASTER_RELEASE} STREQUAL "")
-    # 使用 FetchContent 下载并构建 yaml-cpp
-    FetchContent_Declare(
-            yaml-cpp
-            GIT_REPOSITORY https://github.com/jbeder/yaml-cpp.git
-            GIT_TAG 0.8.0
-    )
-    FetchContent_MakeAvailable(yaml-cpp)
+    # 可选：静态链接
+    set(BUILD_SHARED_LIBS OFF)
+    # 关键：强制使用 FetchContent 的版本
+    set(OATPP_MODULE_LOCATION "BUNDLED")
 
-    # 使用 FetchContent 下载并构建 spdlog
-    FetchContent_Declare(
-            spdlog
-            GIT_REPOSITORY https://github.com/gabime/spdlog.git
-            GIT_TAG v1.9.2
-    )
-    FetchContent_MakeAvailable(spdlog)
-else()
-    find_package(yaml-cpp REQUIRED)
-    find_package(spdlog REQUIRED)
+    set(oatpp_VERSION 1.3.1)
+    set(oatpp_FOUND TRUE)
 endif()
 
-if (MSVC)
-find_package(CURL REQUIRED)
-endif
+# 下载 oatpp 1.3.1
+FetchContent_Declare(
+    oatpp
+    GIT_REPOSITORY https://github.com/oatpp/oatpp.git
+    GIT_TAG 1.3.1
+)
 
-find_package(oatpp REQUIRED)
-find_package(oatpp-curl REQUIRED)
-#find_package(gtest REQUIRED)
+# 下载 oatpp-curl 1.3.0
+FetchContent_Declare(
+    oatpp-curl
+    GIT_REPOSITORY https://github.com/oatpp/oatpp-curl.git
+    GIT_TAG 1.3.0
+    PATCH_COMMAND 
+    ${CMAKE_COMMAND} -E replace 
+    "${oatpp-curl_SOURCE_DIR}/CMakeLists.txt" 
+    "find_package(oatpp 1.3.0 EXACT)" 
+    "find_package(oatpp 1.3.1 EXACT)"
+)
+
+# 分步编译
+FetchContent_GetProperties(oatpp)
+if(NOT oatpp_POPULATED)
+    FetchContent_Populate(oatpp)
+    add_subdirectory(${oatpp_SOURCE_DIR} ${oatpp_BINARY_DIR})
+endif()
+
+FetchContent_GetProperties(oatpp-curl)
+if(NOT oatpp-curl_POPULATED)
+    FetchContent_Populate(oatpp-curl)
+    add_subdirectory(${oatpp-curl_SOURCE_DIR} ${oatpp-curl_BINARY_DIR})
+endif()
+
+# 其他依赖（yaml-cpp, spdlog）
+FetchContent_MakeAvailable(yaml-cpp spdlog)
 
 message("oatpp_VERSION: ${oatpp_VERSION}")
 message("oatpp-curl_VERSION: ${oatpp_VERSION}")
