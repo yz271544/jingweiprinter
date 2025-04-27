@@ -872,8 +872,25 @@ LookAtPoint *JwLayout3D::set3DCanvasCamera(
 
   // 计算摄像机到观察点的距离
   double heightDiff = camera->cameraHeight - camera->centerHeight;
-  double distance = heightDiff / std::sin(pitch * M_PI / 180.0);
-  distance *= 0.5;
+  double baseDistance = heightDiff / std::sin(pitch * M_PI / 180.0);
+  baseDistance *= 0.5;
+
+  // 根据heading角度调整distance
+  double distance = baseDistance;
+  double angleRad = yaw * M_PI / 180.0;
+  
+  // 计算heading角度相对于0度的偏移量（0-90度）
+  double angleOffset = std::abs(std::fmod(yaw, 90.0));
+  if (angleOffset > 45.0) {
+    angleOffset = 90.0 - angleOffset;
+  }
+  
+  // 当heading接近90/270度时，增加distance
+  if (std::abs(std::fmod(yaw, 180.0) - 90.0) < 45.0) {
+    // 使用二次函数来平滑地增加distance
+    double scale = 1.0 + (1000.0 / baseDistance) * (1.0 - std::cos(2.0 * angleOffset * M_PI / 180.0));
+    distance = baseDistance * scale;
+  }
 
   // 计算视锥体参数
   double verticalFov = fov * M_PI / 180.0;
@@ -888,9 +905,6 @@ LookAtPoint *JwLayout3D::set3DCanvasCamera(
   double qgisCenterY = centerScene->z();
   double qgisCenterZ = 0.0;
 
-  // 根据heading角度计算偏移量
-  double angleRad = yaw * M_PI / 180.0;
-  
   // 使用简单的三角函数计算偏移量
   double offsetFactor = 0.5; // 调整因子
   double offsetX = std::sin(angleRad) * distance * offsetFactor;
@@ -922,8 +936,8 @@ LookAtPoint *JwLayout3D::set3DCanvasCamera(
   // 创建观察点
   QgsVector3D lookAtCenterPosition(qgisCenterX, qgisCenterY, qgisCenterZ);
 
-  spdlog::info("Camera parameters - fov: {}, aspectRatio: {}, nearPlane: {}, farPlane: {}, distance: {}",
-               fov, aspectRatio, nearPlane, farPlane, distance);
+  spdlog::info("Camera parameters - fov: {}, aspectRatio: {}, nearPlane: {}, farPlane: {}, baseDistance: {}, adjustedDistance: {}",
+               fov, aspectRatio, nearPlane, farPlane, baseDistance, distance);
   spdlog::info("lookAtCenterPosition: {}:{}:{}, distance: {}, pitch: {}, yaw: {}, heightDiff: {}, offsetX: {}, offsetZ: {}",
                lookAtCenterPosition.x(), lookAtCenterPosition.y(), lookAtCenterPosition.z(), 
                distance, pitch, yaw, heightDiff, offsetX, offsetZ);
