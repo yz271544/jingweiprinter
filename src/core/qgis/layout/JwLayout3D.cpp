@@ -891,33 +891,28 @@ LookAtPoint *JwLayout3D::set3DCanvasCamera(
   // 根据heading角度计算偏移量
   double angleRad = yaw * M_PI / 180.0;
   
-  // 使用Cesium的摄像机方向向量计算偏移量
-  double offsetX = 0.0;
-  double offsetZ = 0.0;
+  // 使用简单的三角函数计算偏移量
+  double offsetFactor = 0.5; // 调整因子
+  double offsetX = std::sin(angleRad) * distance * offsetFactor;
+  double offsetZ = std::cos(angleRad) * distance * offsetFactor;
   
-  try {
-    // 使用Cesium的摄像机方向向量
-    if (camera->cameraDirX != nullptr && camera->cameraDirY != nullptr && camera->cameraDirZ != nullptr) {
-      // 计算方向向量的长度
-      double dirLength = std::sqrt(
-        camera->cameraDirX * camera->cameraDirX + 
-        camera->cameraDirY * camera->cameraDirY + 
-        camera->cameraDirZ * camera->cameraDirZ
-      );
-      
-      // 使用方向向量计算偏移量
-      offsetX = -camera->cameraDirX / dirLength * distance * 0.5;
-      offsetZ = -camera->cameraDirZ / dirLength * distance * 0.5;
-    } else {
-      // 如果没有方向向量，使用heading角度计算
-      offsetX = std::sin(angleRad) * distance * 0.5;
-      offsetZ = std::cos(angleRad) * distance * 0.5;
-    }
-  } catch (const std::exception& e) {
-    spdlog::error("Error calculating offset from camera direction: {}", e.what());
-    // 如果出错，使用简单的heading角度计算
-    offsetX = std::sin(angleRad) * distance * 0.5;
-    offsetZ = std::cos(angleRad) * distance * 0.5;
+  // 根据heading角度调整偏移方向
+  if (yaw == 90) {
+    // 90度时，向右偏移
+    offsetX = distance * offsetFactor;
+    offsetZ = 0;
+  } else if (yaw == 270) {
+    // 270度时，向左偏移
+    offsetX = -distance * offsetFactor;
+    offsetZ = 0;
+  } else if (yaw == 180) {
+    // 180度时，向后偏移
+    offsetX = 0;
+    offsetZ = -distance * offsetFactor;
+  } else if (yaw == 0 || yaw == 360) {
+    // 0度时，向前偏移
+    offsetX = 0;
+    offsetZ = distance * offsetFactor;
   }
   
   // 调整观察点位置
