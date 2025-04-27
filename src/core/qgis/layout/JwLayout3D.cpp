@@ -888,24 +888,36 @@ LookAtPoint *JwLayout3D::set3DCanvasCamera(
   double qgisCenterY = centerScene->z();
   double qgisCenterZ = 0.0;
 
-  // 根据heading角度和视锥体参数调整观察点位置
+  // 根据heading角度计算偏移量
   double angleRad = yaw * M_PI / 180.0;
   
-  // 计算视锥体对角线长度
-  double diagonal = std::sqrt(nearWidth * nearWidth + nearHeight * nearHeight);
+  // 使用Cesium的摄像机方向向量计算偏移量
+  double offsetX = 0.0;
+  double offsetZ = 0.0;
   
-  // 根据heading角度计算偏移量
-  // 使用对角线长度作为基础，并考虑heading角度的影响
-  double offsetFactor = 0.3; // 调整因子，控制偏移量大小
-  double offsetX = std::sin(angleRad) * diagonal * offsetFactor;
-  double offsetZ = std::cos(angleRad) * diagonal * offsetFactor;
-  
-  // 根据heading角度调整偏移方向
-  if (yaw > 0 && yaw < 180) {
-    offsetX = -offsetX;
-  }
-  if (yaw > 90 && yaw < 270) {
-    offsetZ = -offsetZ;
+  try {
+    // 使用Cesium的摄像机方向向量
+    if (camera->cameraDirX != nullptr && camera->cameraDirY != nullptr && camera->cameraDirZ != nullptr) {
+      // 计算方向向量的长度
+      double dirLength = std::sqrt(
+        camera->cameraDirX * camera->cameraDirX + 
+        camera->cameraDirY * camera->cameraDirY + 
+        camera->cameraDirZ * camera->cameraDirZ
+      );
+      
+      // 使用方向向量计算偏移量
+      offsetX = -camera->cameraDirX / dirLength * distance * 0.5;
+      offsetZ = -camera->cameraDirZ / dirLength * distance * 0.5;
+    } else {
+      // 如果没有方向向量，使用heading角度计算
+      offsetX = std::sin(angleRad) * distance * 0.5;
+      offsetZ = std::cos(angleRad) * distance * 0.5;
+    }
+  } catch (const std::exception& e) {
+    spdlog::error("Error calculating offset from camera direction: {}", e.what());
+    // 如果出错，使用简单的heading角度计算
+    offsetX = std::sin(angleRad) * distance * 0.5;
+    offsetZ = std::cos(angleRad) * distance * 0.5;
   }
   
   // 调整观察点位置
@@ -915,8 +927,8 @@ LookAtPoint *JwLayout3D::set3DCanvasCamera(
   // 创建观察点
   QgsVector3D lookAtCenterPosition(qgisCenterX, qgisCenterY, qgisCenterZ);
 
-  spdlog::info("Camera parameters - fov: {}, aspectRatio: {}, nearPlane: {}, farPlane: {}, nearHeight: {}, nearWidth: {}, diagonal: {}",
-               fov, aspectRatio, nearPlane, farPlane, nearHeight, nearWidth, diagonal);
+  spdlog::info("Camera parameters - fov: {}, aspectRatio: {}, nearPlane: {}, farPlane: {}, distance: {}",
+               fov, aspectRatio, nearPlane, farPlane, distance);
   spdlog::info("lookAtCenterPosition: {}:{}:{}, distance: {}, pitch: {}, yaw: {}, heightDiff: {}, offsetX: {}, offsetZ: {}",
                lookAtCenterPosition.x(), lookAtCenterPosition.y(), lookAtCenterPosition.z(), 
                distance, pitch, yaw, heightDiff, offsetX, offsetZ);
